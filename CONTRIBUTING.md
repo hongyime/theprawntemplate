@@ -1,21 +1,21 @@
 # Contributing
 
-## Workflow
+Thanks for your interest in contributing!
 
-1. Create a branch for your change.
-2. Keep commits focused and use a clear message, for example `fix: handle empty input`.
-3. Run the repo checks listed in `README.md`.
-4. Open a pull request and describe what changed.
+## Getting started
 
-## Safety
+1. Fork the repo
+2. Create a feature branch: `git checkout -b feat/your-feature`
+3. Commit using [Conventional Commits](https://www.conventionalcommits.org): `feat:`, `fix:`, `chore:`, `docs:`, etc.
+4. Open a pull request against `main`
 
-- Do not commit secrets or personal details.
-- Do not commit `.env` files.
-- Do not rewrite git history on shared branches.
-- Ask before deleting files or changing deployment settings.
+## Guidelines
 
-## Project State
+- Keep PRs focused — one logical change per PR
+- No commented-out code or leftover debug statements
+- Update documentation if behaviour changes
+- Secrets must never be committed — TruffleHog scans every PR
 
-If the repo uses cross-agent state, it lives in `.agents/STATE.md` and
-`.agents/handoffs/`. These files may be public in public repos, so keep them
-professional and free of secrets.
+## Reporting bugs
+
+Use the [bug report](.github/ISSUE_TEMPLATE/bug_report.md) issue template.

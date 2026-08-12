@@ -1,12 +1,17 @@
 ---
 name: Feature request
-about: Suggest an improvement
-title: "feat: "
+about: Suggest an idea or improvement
 labels: enhancement
 ---
 
-## Problem
+**Problem / motivation**
+What problem does this solve? What's the use case?
 
-## Proposed change
+**Proposed solution**
+Describe what you'd like to happen.
 
-## Notes
+**Alternatives considered**
+Any other approaches you thought about.
+
+**Additional context**
+Mockups, examples, or related issues.
