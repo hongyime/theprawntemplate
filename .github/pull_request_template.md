@@ -1,17 +1,9 @@
 ## Summary
 
-<!-- What does this PR do and why? -->
+Describe the change in one or two sentences.
 
-## Changes
+## Checks
 
-<!-- List the key changes made -->
-
-## Testing
-
-<!-- How was this tested? -->
-
-## Checklist
-
-- [ ] No debug code or console logs left behind
-- [ ] No secrets or credentials committed
-- [ ] Documentation updated if behaviour changed
+- [ ] I ran the relevant local checks.
+- [ ] I did not commit secrets or personal details.
+- [ ] I updated setup or usage docs if behavior changed.
