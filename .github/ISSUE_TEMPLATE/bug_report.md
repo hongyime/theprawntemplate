@@ -1,14 +1,27 @@
 ---
 name: Bug report
-about: Report something broken
-title: "fix: "
+about: Something isn't working
 labels: bug
 ---
 
-## What happened?
+**Describe the bug**
+A clear description of what the bug is.
 
-## Expected behavior
+**Steps to reproduce**
+1. Go to '...'
+2. Click on '...'
+3. See error
 
-## Steps to reproduce
+**Expected behaviour**
+What you expected to happen.
 
-## Environment
+**Actual behaviour**
+What actually happened.
+
+**Environment**
+- OS:
+- Browser / runtime version:
+- Relevant dependency versions:
+
+**Additional context**
+Logs, screenshots, or anything else useful.
