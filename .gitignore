@@ -20,6 +20,7 @@ __pycache__/
 .agents/skills/
 
 
+
 # AI / editor dot directories (managed via sourcerepo)
 .*
 !.github/
