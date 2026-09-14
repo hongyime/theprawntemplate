@@ -1,0 +1,15 @@
+{
+  "lockfileVersion": 1,
+  "configVersion": 1,
+  "workspaces": {
+    "": {
+      "name": "workflow-install-fixture",
+      "devDependencies": {
+        "prawn-bun-install-fixture": "file:./fixture-build",
+      },
+    },
+  },
+  "packages": {
+    "prawn-bun-install-fixture": ["prawn-bun-install-fixture@file:fixture-build", { "bin": { "prawn-bun-install-fixture": "cli.cjs" } }],
+  }
+}

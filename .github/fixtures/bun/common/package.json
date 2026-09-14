@@ -1,0 +1,1 @@
+{"name": "workflow-install-fixture", "private": true, "scripts": {"build": "prawn-bun-install-fixture"}, "devDependencies": {"prawn-bun-install-fixture": "file:./fixture-build"}}
