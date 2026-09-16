@@ -1,0 +1,71 @@
+name: Bun workflow fixtures
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/ci.yml
+      - .github/workflows/bun-workflow-fixtures.yml
+      - .github/scripts/verify-bun-workflow.py
+      - .github/fixtures/bun/**
+  push:
+    branches: [main, master]
+    paths:
+      - .github/workflows/ci.yml
+      - .github/workflows/bun-workflow-fixtures.yml
+      - .github/scripts/verify-bun-workflow.py
+      - .github/fixtures/bun/**
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bun-fixtures-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fixture:
+    name: Bun fixture (${{ matrix.format }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        format: [legacy, modern]
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install workflow parser
+        run: python3 -m pip install --disable-pip-version-check PyYAML==6.0.3
+
+      - name: Run template detector and prepare setup inputs
+        id: prepare
+        env:
+          FIXTURE_FORMAT: ${{ matrix.format }}
+        run: python3 .github/scripts/verify-bun-workflow.py prepare --format "$FIXTURE_FORMAT" --github-output "$GITHUB_OUTPUT"
+
+      - name: Setup Node from template inputs
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ steps.prepare.outputs.node-version }}
+          cache: ${{ steps.prepare.outputs.node-cache }}
+          package-manager-cache: ${{ steps.prepare.outputs.node-auto-cache }}
+
+      - name: Setup Bun from template inputs
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ steps.prepare.outputs.bun-version }}
+
+      - name: Verify fresh build and frozen mismatch
+        env:
+          FIXTURE_DIRECTORY: ${{ steps.prepare.outputs.directory }}
+        run: python3 .github/scripts/verify-bun-workflow.py verify --directory "$FIXTURE_DIRECTORY"
+
+      - name: Preserve fixture evidence
+        if: always() && steps.prepare.outputs.directory != ''
+        uses: actions/upload-artifact@v7
+        with:
+          name: bun-workflow-${{ matrix.format }}
+          path: ${{ steps.prepare.outputs.directory }}/fixture-results.json
+          if-no-files-found: ignore
+          retention-days: 7
