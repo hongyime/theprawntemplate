@@ -35,6 +35,8 @@ Add exact commands needed to install dependencies and run locally.
 
 Add deployment instructions, or state clearly that this repo is not deployed.
 
+> **Warning:** Cloudflare Workers are restricted to the Free Tier limit of 100,000 requests per day. Ensure `wrangler.toml` is configured to fail-open so static assets continue to serve if the limit is exceeded.
+
 ## Checks
 
 Run the project checks before opening a pull request. Add the real commands once
