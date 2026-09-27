@@ -7,3 +7,7 @@
 - Recent merged: #9 (Bun install fix for template builds).
 - Free-tier surface: none (template only). No deploy.
 - Next safe steps: owner review of stashed local edits (would add PostHog/Sentry/Cloudflare Pages workflow — evaluate before promoting; potential paid-service exposure violates $0 constraint if telemetry backends are paid).
+
+## Privacy maintenance - 2026-09-27
+
+Remove the optional personal security contact while retaining private vulnerability-reporting guidance. The narrow documentation patch is prepared from the current default branch; staged whitespace and the inherited identity hook are publication checks. Application behavior is unchanged.
