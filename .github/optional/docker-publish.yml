@@ -1,0 +1,258 @@
+name: Publish container images
+on:
+  push:
+  
+  branches: [main]
+  workflow_dispatch:
+
+perm
+issions:
+  contents: read
+  packages: write
+
+
+concurrency:
+  group: ghcr-publish
+  cancel-i
+n-progress: false
+
+jobs:
+  publish:
+    if: g
+ithub.ref == format('refs/heads/{0}', github.
+event.repository.default_branch) || startsWit
+h(github.ref, 'refs/tags/v')
+    runs-on: ubu
+ntu-latest
+    strategy:
+      fail-fast: fal
+se
+      matrix:
+        include: [{"name":"a
+pi","context":".","file":"Dockerfile"},{"name
+":"dashboard","context":"./operations-dashboa
+rd","file":"operations-dashboard/Dockerfile"}
+]
+    steps:
+      - uses: actions/checkout@1
+1d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Verify manifest retention rules
+
+        run: node --test .github/scripts/ghc
+r-retention.test.cjs
+      - uses: docker/set
+up-buildx-action@8d2750c68a42422c14e847fe6c8a
+c0403b4cbd6f # v3
+      - name: Image name
+  
+      id: image
+        env:
+          REPOSI
+TORY: ${{ github.repository }}
+          COMP
+ONENT: ${{ matrix.name }}
+        run: |
+    
+      echo "name=ghcr.io/${REPOSITORY,,}/$COM
+PONENT" >> "$GITHUB_OUTPUT"
+      - uses: doc
+ker/login-action@c94ce9fb468520275223c153574b
+00df6fe4bcc9 # v3
+        with:
+          reg
+istry: ghcr.io
+          username: ${{ github
+.actor }}
+          password: ${{ secrets.GIT
+HUB_TOKEN }}
+      - uses: docker/metadata-ac
+tion@c299e40c65443455700f0fdfc63efafe5b349051
+ # v5
+        id: metadata
+        with:
+    
+      images: ${{ steps.image.outputs.name }}
+
+          flavor: latest=false
+          tag
+s: |
+            type=raw,value=latest,enable
+={{is_default_branch}}
+            type=sha,f
+ormat=short,prefix=sha-
+            type=semv
+er,pattern={{version}}
+      - uses: docker/b
+uild-push-action@10e90e3645eae34f1e60eeb005ba
+3a3d33f178e8 # v6
+        with:
+          con
+text: ${{ matrix.context }}
+          file: $
+{{ matrix.file }}
+          target: productio
+n
+          platforms: linux/amd64
+          
+# Single architecture without attestations; r
+etention also inspects manifests.
+          p
+rovenance: false
+          sbom: false
+      
+    push: true
+          tags: ${{ steps.meta
+data.outputs.tags }}
+          labels: ${{ st
+eps.metadata.outputs.labels }}
+          cach
+e-from: type=gha,scope=${{ matrix.name }}
+   
+       cache-to: type=gha,mode=max,scope=${{ 
+matrix.name }}
+      - name: Record published
+ image size
+        env:
+          IMAGE: ${{
+ steps.image.outputs.name }}
+        run: |
+ 
+         docker buildx imagetools inspect "$I
+MAGE:sha-${GITHUB_SHA::7}" --raw |
+          
+  python -c 'import json,sys; m=json.load(sys
+.stdin); print("Compressed layer bytes:", sum
+(x["size"] for x in m.get("layers", [])))'
+
+ 
+ cleanup:
+    needs: publish
+    runs-on: ubu
+ntu-latest
+    strategy:
+      fail-fast: fal
+se
+      matrix:
+        include: [{"name":"a
+pi"},{"name":"dashboard"}]
+    steps:
+      -
+ uses: actions/checkout@11d5960a326750d583807
+8e36cf38b85af677262 # v4
+      - uses: docker
+/setup-buildx-action@8d2750c68a42422c14e847fe
+6c8ac0403b4cbd6f # v3
+      - uses: docker/lo
+gin-action@c94ce9fb468520275223c153574b00df6f
+e4bcc9 # v3
+        with:
+          registry:
+ ghcr.io
+          username: ${{ github.actor
+ }}
+          password: ${{ secrets.GITHUB_TO
+KEN }}
+      - name: Package name
+        id:
+ package
+        env:
+          REPOSITORY: $
+{{ github.event.repository.name }}
+          
+COMPONENT: ${{ matrix.name }}
+        run: ec
+ho "name=${REPOSITORY,,}/$COMPONENT" >> "$GIT
+HUB_OUTPUT"
+      - name: Verify package visi
+bility
+        uses: actions/github-script@f2
+8e40c7f34bde8b3046d885e986cb6290c5673b # v7
+ 
+       env:
+          PACKAGE_NAME: ${{ steps
+.package.outputs.name }}
+        with:
+      
+    script: |
+            const owner = conte
+xt.repo.owner;
+            const {data: accou
+nt} = await github.rest.users.getByUsername({
+username: owner});
+            const prefix =
+ account.type === 'Organization' ? 'orgs' : '
+users';
+            const route = 'GET /' + p
+refix + '/' + encodeURIComponent(owner) + '/p
+ackages/container/' + encodeURIComponent(proc
+ess.env.PACKAGE_NAME);
+            const {dat
+a: pkg} = await github.request(route);
+      
+      core.info('Package visibility: ' + pkg.
+visibility);
+            await core.summary.a
+ddHeading('Package access').addRaw(process.en
+v.PACKAGE_NAME + ': ' + pkg.visibility).write
+();
+            if (pkg.visibility !== 'publi
+c') core.warning('Set this package to public 
+in GitHub package settings, then verify anony
+mous access.');
+      - name: Verify manifest
+s and select old tagged versions
+        id: 
+retention
+        uses: actions/github-script
+@f28e40c7f34bde8b3046d885e986cb6290c5673b # v
+7
+        env:
+          PACKAGE_NAME: ${{ st
+eps.package.outputs.name }}
+        with:
+   
+       script: |
+            const plan = req
+uire('./.github/scripts/ghcr-retention.cjs');
+
+            await plan({github, context, cor
+e});
+      - name: Retain three untagged vers
+ions
+        if: steps.retention.outputs.safe
+_single_arch == 'true'
+        uses: actions/
+delete-package-versions@e5bc658cc4c965c472efe
+991f8beea3981499c55 # v5
+        with:
+      
+    owner: ${{ github.repository_owner }}
+   
+       package-name: ${{ steps.package.output
+s.name }}
+          package-type: container
+ 
+         delete-only-untagged-versions: true
+
+          min-versions-to-keep: 3
+      - nam
+e: Bound tagged history separately
+        if
+: steps.retention.outputs.tagged_ids != ''
+  
+      uses: actions/delete-package-versions@e
+5bc658cc4c965c472efe991f8beea3981499c55 # v5
+
+        with:
+          owner: ${{ github.rep
+ository_owner }}
+          package-name: ${{ 
+steps.package.outputs.name }}
+          packa
+ge-type: container
+          package-version-
+ids: ${{ steps.retention.outputs.tagged_ids }
+}
+
+

@@ -11,3 +11,7 @@
 ## Privacy maintenance - 2026-09-27
 
 Remove the optional personal security contact while retaining private vulnerability-reporting guidance. The narrow documentation patch is prepared from the current default branch; staged whitespace and the inherited identity hook are publication checks. Application behavior is unchanged.
+
+## Repository standards manifest - 2026-09-27
+
+Seed STANDARDS.md (authoritative fleet standards manifest) so new repos created from this template inherit it, plus opt-in GHCR packaging scaffolding under .github/optional/ (docker-publish.yml + ghcr-retention.cjs + README) for repos that publish containers. STANDARDS.md is also maintained in sourcerepo and propagated fleet-wide via the sync allowlist. Derived from a live 79-repo compliance audit.
